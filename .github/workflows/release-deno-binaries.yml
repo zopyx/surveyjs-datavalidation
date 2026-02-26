@@ -1,0 +1,54 @@
+name: Release Deno Binaries
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-deno-binaries
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Deno binaries
+        run: python deno_build.py --force --targets darwin linux
+
+      - name: Prepare release metadata
+        id: meta
+        run: |
+          set -eu
+          ts="$(date -u +'%Y%m%d-%H%M%S')"
+          tag="deno-binaries-${ts}"
+          title="Deno binaries ${ts} (UTC)"
+          {
+            echo "tag=${tag}"
+            echo "title=${title}"
+          } >> "$GITHUB_OUTPUT"
+
+          sha256sum validate-linux validate-mac > checksums.txt
+
+      - name: Publish GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.meta.outputs.tag }}" \
+            validate-linux \
+            validate-mac \
+            checksums.txt \
+            --title "${{ steps.meta.outputs.title }}" \
+            --notes "Automated scheduled build of Deno-compiled binaries."

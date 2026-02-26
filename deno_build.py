@@ -113,42 +113,8 @@ def _build_target(args: tuple[str, str, bool]) -> str:
             env=env,
             check=True,
         )
-        _strip_binary(temp_output, system)
         shutil.copy2(temp_output, target_path)
     return target_path
-
-
-def _strip_binary(binary_path: str, target_system: str) -> None:
-    """Reduce binary size by stripping symbols when safe on the current host.
-
-    We only attempt stripping when the build target matches the host OS because
-    the host `strip` tool typically cannot process foreign binary formats.
-    Failures are ignored so builds remain portable.
-    """
-    host_system = platform.system().lower()
-    if host_system != target_system:
-        return
-
-    strip_tools = [tool for tool in ("strip", "llvm-strip") if shutil.which(tool)]
-    if not strip_tools:
-        return
-
-    for tool in strip_tools:
-        command = [tool]
-        if target_system == "darwin":
-            # Keep global symbols; removes local symbols and usually preserves usability.
-            command.append("-x")
-        command.append(binary_path)
-        try:
-            subprocess.run(
-                command,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return
-        except (OSError, subprocess.SubprocessError):
-            continue
 
 
 def deno_build(force: bool = False) -> str:

@@ -69,29 +69,3 @@ class DenoBuildTests(unittest.TestCase):
             self.assertCountEqual(results, expected)
             build_mock.assert_any_call(("darwin", "/tmp/deno", False))
             build_mock.assert_any_call(("linux", "/tmp/deno", False))
-
-    def test_strip_binary_runs_on_matching_host(self) -> None:
-        with (
-            mock.patch("deno_build.platform.system", return_value="Linux"),
-            mock.patch(
-                "deno_build.shutil.which",
-                side_effect=lambda tool: (
-                    f"/usr/bin/{tool}" if tool == "strip" else None
-                ),
-            ),
-            mock.patch("deno_build.subprocess.run") as run_mock,
-        ):
-            deno_build._strip_binary("/tmp/validate-linux", "linux")
-
-            run_mock.assert_called_once()
-            command = run_mock.call_args[0][0]
-            self.assertEqual(command, ["strip", "/tmp/validate-linux"])
-
-    def test_strip_binary_skips_cross_target(self) -> None:
-        with (
-            mock.patch("deno_build.platform.system", return_value="Linux"),
-            mock.patch("deno_build.subprocess.run") as run_mock,
-        ):
-            deno_build._strip_binary("/tmp/validate-mac", "darwin")
-
-            run_mock.assert_not_called()

@@ -72,7 +72,7 @@ function parseArgs(argv) {
   };
 
   const requireValue = (flag, value) => {
-    if (!value || value.startsWith("--")) {
+    if (!value || value.startsWith("-")) {
       fail(`Missing value for ${flag}`);
     }
     return value;
@@ -81,13 +81,13 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
 
-    if (arg === "--schema-json") {
+    if (arg === "--schema-json" || arg === "-s") {
       options.schemaJson = requireValue(arg, argv[i + 1]);
       i += 1;
-    } else if (arg === "--form-json") {
+    } else if (arg === "--form-json" || arg === "-f") {
       options.formJson = requireValue(arg, argv[i + 1]);
       i += 1;
-    } else if (arg === "--result-json") {
+    } else if (arg === "--result-json" || arg === "-r") {
       options.resultJson = requireValue(arg, argv[i + 1]);
       i += 1;
     } else if (arg === "--help" || arg === "-h") {
@@ -97,9 +97,9 @@ function parseArgs(argv) {
           "",
           "Options:",
           "  --version              Print the survey-core version and exit",
-          "  --schema-json <path>   Path to the survey schema JSON file",
-          "  --form-json <path>     Path to the form response JSON file",
-          "  --result-json <path>   Path to write validation results (default: output.json)",
+          "  -s, --schema-json <path>   Path to the survey schema JSON file",
+          "  -f, --form-json <path>     Path to the form response JSON file",
+          "  -r, --result-json <path>   Path to write validation results (default: output.json)",
         ].join("\n")
       );
       process.exit(0);

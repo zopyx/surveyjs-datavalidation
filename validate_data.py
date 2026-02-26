@@ -1,9 +1,9 @@
 """Python wrapper for the platform-specific validate binary.
 
 The validate binary exposes the following CLI (see `--help`):
-  --schema-json <path>
-  --form-json <path>
-  --result-json <path>
+  -s, --schema-json <path>
+  -f, --form-json <path>
+  -r, --result-json <path>
 
 This module mirrors those arguments in validate_data().
 """
@@ -99,16 +99,19 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         description="Validate survey data using the native binary."
     )
     parser.add_argument(
+        "-s",
         "--schema-json",
         default=DEFAULT_SCHEMA_JSON,
         help="Path to the survey schema JSON file.",
     )
     parser.add_argument(
+        "-f",
         "--form-json",
         default=DEFAULT_FORM_JSON,
         help="Path to the form response JSON file.",
     )
     parser.add_argument(
+        "-r",
         "--result-json",
         default=DEFAULT_RESULT_JSON,
         help="Path to write validation results.",

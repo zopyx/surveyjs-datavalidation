@@ -81,3 +81,23 @@ class ValidateDataTests(unittest.TestCase):
                 form_json="form.json",
                 result_json="result.json",
             )
+
+    def test_main_parses_short_args(self) -> None:
+        with mock.patch("validate_data.validate_data", return_value=0) as validate_mock:
+            exit_code = validate_data.main(
+                [
+                    "-s",
+                    "schema.json",
+                    "-f",
+                    "form.json",
+                    "-r",
+                    "result.json",
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            validate_mock.assert_called_once_with(
+                schema_json="schema.json",
+                form_json="form.json",
+                result_json="result.json",
+            )

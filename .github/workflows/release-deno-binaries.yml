@@ -29,6 +29,37 @@ jobs:
       - name: Build Deno binaries
         run: python deno_build.py --force --targets darwin linux
 
+      - name: Smoke test Linux binary
+        run: |
+          set -eu
+          ./validate-linux --version
+          ./validate-linux \
+            --schema-json survey.json \
+            --form-json data-valid.json \
+            --result-json output-valid.json
+          python - <<'PY'
+          import json
+          with open("output-valid.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          assert data["valid"] is True, data
+          PY
+
+          if ./validate-linux \
+            --schema-json survey.json \
+            --form-json data-invalid.json \
+            --result-json output-invalid.json; then
+            echo "Expected invalid sample to fail"
+            exit 1
+          fi
+
+          python - <<'PY'
+          import json
+          with open("output-invalid.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          assert data["valid"] is False, data
+          assert data["errors"], data
+          PY
+
       - name: Prepare release metadata
         id: meta
         run: |

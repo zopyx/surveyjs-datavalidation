@@ -10,12 +10,18 @@ DENO_TARGET_MAC := x86_64-apple-darwin
 DENO_TARGET_LINUX := x86_64-unknown-linux-gnu
 
 .PHONY: all baseline mac linux deno-mac deno-linux assets clean bun-install \
-	docker docker-linux docker-mac docker-mac-extract
+	docker docker-linux docker-mac docker-mac-extract test
 
 all: install mac linux
 
 deno: deno-mac deno-linux
 bun: linux mac
+
+test:
+	python -m unittest discover -s tests
+	node $(ENTRY) --version
+	node $(ENTRY) --schema-json survey.json --form-json data-valid.json --result-json output.json
+	node $(ENTRY) --schema-json survey.json --form-json data-invalid.json --result-json output.json; test $$? -eq 1
 
 
 install:

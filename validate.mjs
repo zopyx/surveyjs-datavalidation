@@ -3,7 +3,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Model } from "survey-core";
+import * as surveyCoreModule from "survey-core";
+
+const surveyCore =
+  Reflect.get(surveyCoreModule, "default") ??
+  Reflect.get(surveyCoreModule, "module.exports") ??
+  surveyCoreModule;
+const { Model, Version: surveyCoreVersion } = surveyCore;
 
 // For compiled binaries, process.execPath points to the binary itself.
 // For direct execution, import.meta.url points to this module.
@@ -90,11 +96,15 @@ function parseArgs(argv) {
           "Usage: validate.mjs [options]",
           "",
           "Options:",
+          "  --version              Print the survey-core version and exit",
           "  --schema-json <path>   Path to the survey schema JSON file",
           "  --form-json <path>     Path to the form response JSON file",
           "  --result-json <path>   Path to write validation results (default: output.json)",
         ].join("\n")
       );
+      process.exit(0);
+    } else if (arg === "--version") {
+      console.log(surveyCoreVersion ?? "unknown");
       process.exit(0);
     } else {
       fail(`Unknown argument: ${arg}`);
